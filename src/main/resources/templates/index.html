@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Zepto AI 3D Agent</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --purple: #8b5cf6;
+            --purple2: #c026d3;
+            --pink: #ec4899;
+            --dark: #08050f;
+            --text: #ffffff;
+            --muted: #aaa1b8;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            color: var(--text);
+
+            background:
+                radial-gradient(
+                    circle at 50% -10%,
+                    rgba(139,92,246,.35),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 90% 30%,
+                    rgba(236,72,153,.16),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 10% 80%,
+                    rgba(192,38,211,.14),
+                    transparent 30%
+                ),
+                #08050f;
+
+            overflow-x: hidden;
+        }
+
+
+        /* =========================
+           3D BACKGROUND
+           ========================= */
+
+        .background-grid {
+
+            position: fixed;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            opacity: .18;
+
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,.04) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.04) 1px,
+                    transparent 1px
+                );
+
+            background-size: 55px 55px;
+
+            transform:
+                perspective(500px)
+                rotateX(55deg)
+                scale(1.8);
+
+            transform-origin: center bottom;
+        }
+
+
+        .app {
+
+            position: relative;
+
+            max-width: 1250px;
+
+            margin: auto;
+
+            padding: 28px 22px 60px;
+
+            z-index: 2;
+        }
+
+
+        /* =========================
+           HEADER
+           ========================= */
+
+        .header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin-bottom: 28px;
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+        }
+
+
+        .logo {
+
+            width: 52px;
+            height: 52px;
+
+            display: grid;
+
+            place-items: center;
+
+            border-radius: 17px;
+
+            font-size: 25px;
+
+            font-weight: 900;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #7c3aed,
+                    #c026d3
+                );
+
+            box-shadow:
+                0 10px 30px rgba(139,92,246,.45),
+                inset 0 1px 1px rgba(255,255,255,.35);
+
+            transform:
+                perspective(300px)
+                rotateX(8deg)
+                rotateY(-8deg);
+        }
+
+
+        .brand h1 {
+
+            margin: 0;
+
+            font-size: 20px;
+
+            letter-spacing: -.5px;
+        }
+
+
+        .brand p {
+
+            margin: 3px 0;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+
+        .status {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 10px 15px;
+
+            border-radius: 30px;
+
+            background:
+                rgba(255,255,255,.06);
+
+            border:
+                1px solid rgba(255,255,255,.12);
+
+            backdrop-filter: blur(15px);
+
+            color: #c9c1d1;
+
+            font-size: 12px;
+        }
+
+
+        .status-dot {
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #777;
+        }
+
+
+        .status-dot.active {
+
+            background: #35e58b;
+
+            box-shadow:
+                0 0 10px #35e58b;
+        }
+
+
+        /* =========================
+           HERO
+           ========================= */
+
+        .hero {
+
+            position: relative;
+
+            min-height: 430px;
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            align-items: center;
+
+            gap: 30px;
+
+            padding: 42px;
+
+            overflow: hidden;
+
+            border-radius: 32px;
+
+            border:
+                1px solid rgba(255,255,255,.12);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(37,21,62,.92),
+                    rgba(17,10,28,.82)
+                );
+
+            box-shadow:
+                0 40px 100px rgba(0,0,0,.5),
+                inset 0 1px 1px rgba(255,255,255,.08);
+
+            transform:
+                perspective(1200px)
+                rotateX(1deg);
+        }
+
+
+        .hero-content {
+
+            position: relative;
+
+            z-index: 3;
+        }
+
+
+        .eyebrow {
+
+            display: inline-flex;
+
+            padding: 7px 12px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(139,92,246,.13);
+
+            border:
+                1px solid rgba(139,92,246,.3);
+
+            color: #c4a7ff;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.5px;
+        }
+
+
+        .hero h2 {
+
+            margin: 18px 0 12px;
+
+            font-size:
+                clamp(35px,5vw,64px);
+
+            line-height: .98;
+
+            letter-spacing: -3px;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    #ffffff,
+                    #d8b4fe,
+                    #f0abfc
+                );
+
+            -webkit-background-clip: text;
+
+            background-clip: text;
+
+            color: transparent;
+        }
+
+
+        .hero p {
+
+            max-width: 530px;
+
+            color: #b8aebe;
+
+            line-height: 1.7;
+
+            font-size: 14px;
+        }
+
+
+        .chips {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            margin-top: 22px;
+        }
+
+
+        .chip {
+
+            padding: 8px 12px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,.05);
+
+            border:
+                1px solid rgba(255,255,255,.1);
+
+            color: #d8d0df;
+
+            font-size: 11px;
+
+            backdrop-filter: blur(10px);
+        }
+
+
+        /* =========================
+           3D AI ORB
+           ========================= */
+
+        .orb-area {
+
+            position: relative;
+
+            height: 330px;
+
+            display: grid;
+
+            place-items: center;
+
+            perspective: 900px;
+        }
+
+
+        .orb {
+
+            position: relative;
+
+            width: 190px;
+            height: 190px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle at 32% 25%,
+                    #ffffff,
+                    #d8b4fe 8%,
+                    #a855f7 25%,
+                    #7c3aed 50%,
+                    #3b0764 78%,
+                    #12051e 100%
+                );
+
+            box-shadow:
+                0 0 30px #a855f7,
+                0 0 70px rgba(168,85,247,.7),
+                0 0 130px rgba(192,38,211,.35);
+
+            animation:
+                float 4s ease-in-out infinite;
+
+            transform-style: preserve-3d;
+        }
+
+
+        .orb::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: -25px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid rgba(216,180,254,.35);
+
+            transform:
+                rotateX(70deg)
+                rotateY(10deg);
+
+            box-shadow:
+                0 0 30px rgba(168,85,247,.3);
+
+            animation:
+                orbit 6s linear infinite;
+        }
+
+
+        .orb::after {
+
+            content: "";
+
+            position: absolute;
+
+            inset: -45px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid rgba(236,72,153,.22);
+
+            transform:
+                rotateY(70deg);
+
+            animation:
+                orbit2 8s linear infinite;
+        }
+
+
+        .orb-core {
+
+            position: absolute;
+
+            inset: 55px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    #ffffff,
+                    #e9d5ff 25%,
+                    transparent 70%
+                );
+
+            filter: blur(2px);
+        }
+
+
+        @keyframes float {
+
+            0%,100% {
+
+                transform:
+                    translateY(0)
+                    rotateY(0deg);
+            }
+
+            50% {
+
+                transform:
+                    translateY(-15px)
+                    rotateY(18deg);
+            }
+        }
+
+
+        @keyframes orbit {
+
+            from {
+
+                transform:
+                    rotateX(70deg)
+                    rotateZ(0deg);
+            }
+
+            to {
+
+                transform:
+                    rotateX(70deg)
+                    rotateZ(360deg);
+            }
+        }
+
+
+        @keyframes orbit2 {
+
+            from {
+
+                transform:
+                    rotateY(70deg)
+                    rotateZ(0deg);
+            }
+
+            to {
+
+                transform:
+                    rotateY(70deg)
+                    rotateZ(-360deg);
+            }
+        }
+
+
+        /* =========================
+           CARDS
+           ========================= */
+
+        .grid {
+
+            display: grid;
+
+            grid-template-columns:
+                1.15fr .85fr;
+
+            gap: 22px;
+
+            margin-top: 22px;
+        }
+
+
+        .card {
+
+            position: relative;
+
+            padding: 25px;
+
+            border-radius: 25px;
+
+            border:
+                1px solid rgba(255,255,255,.1);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(31,22,43,.85),
+                    rgba(14,9,22,.78)
+                );
+
+            backdrop-filter:
+                blur(22px);
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,.4),
+                inset 0 1px 1px rgba(255,255,255,.06);
+
+            transform:
+                perspective(1000px)
+                rotateX(1deg);
+
+            transition:
+                transform .3s,
+                border .3s;
+        }
+
+
+        .card:hover {
+
+            transform:
+                perspective(1000px)
+                rotateX(0deg)
+                translateY(-4px);
+
+            border-color:
+                rgba(168,85,247,.3);
+        }
+
+
+        .card h3 {
+
+            margin: 0;
+
+            font-size: 17px;
+        }
+
+
+        .muted {
+
+            color: #90869b;
+
+            font-size: 12px;
+
+            margin-top: 5px;
+        }
+
+
+        /* =========================
+           VOICE
+           ========================= */
+
+        .voice-box {
+
+            margin-top: 18px;
+
+            min-height: 230px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 20px;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(139,92,246,.1),
+                    transparent 65%
+                );
+
+            border:
+                1px solid rgba(255,255,255,.07);
+        }
+
+
+        .mic {
+
+            width: 92px;
+            height: 92px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            cursor: pointer;
+
+            font-size: 32px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #7c3aed,
+                    #c026d3
+                );
+
+            box-shadow:
+                0 15px 35px rgba(124,58,237,.4),
+                inset 0 2px 3px rgba(255,255,255,.35);
+
+            transition:
+                transform .2s;
+        }
+
+
+        .mic:hover {
+
+            transform:
+                translateY(-4px)
+                scale(1.06);
+        }
+
+
+        .mic.listening {
+
+            animation:
+                listening 1s infinite;
+        }
+
+
+        @keyframes listening {
+
+            50% {
+
+                box-shadow:
+                    0 0 0 18px rgba(168,85,247,.12),
+                    0 0 0 38px rgba(168,85,247,.05),
+                    0 20px 50px rgba(168,85,247,.6);
+            }
+        }
+
+
+        .voice-state {
+
+            margin-top: 17px;
+
+            font-weight: 700;
+
+            font-size: 14px;
+        }
+
+
+        .transcript {
+
+            margin-top: 7px;
+
+            min-height: 20px;
+
+            color: #968ba1;
+
+            font-size: 12px;
+
+            text-align: center;
+
+            max-width: 90%;
+        }
+
+
+        /* =========================
+           TEXT INPUT
+           ========================= */
+
+        textarea {
+
+            width: 100%;
+
+            min-height: 100px;
+
+            margin-top: 16px;
+
+            padding: 15px;
+
+            resize: vertical;
+
+            border-radius: 15px;
+
+            outline: none;
+
+            border:
+                1px solid rgba(255,255,255,.1);
+
+            background:
+                rgba(0,0,0,.25);
+
+            color: white;
+
+            font: inherit;
+        }
+
+
+        textarea:focus {
+
+            border-color:
+                rgba(168,85,247,.65);
+
+            box-shadow:
+                0 0 20px rgba(139,92,246,.12);
+        }
+
+
+        /* =========================
+           ORDER PLAN
+           ========================= */
+
+        .plan {
+
+            display: grid;
+
+            gap: 9px;
+
+            margin-top: 17px;
+        }
+
+
+        .item {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 14px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            border:
+                1px solid rgba(255,255,255,.08);
+        }
+
+
+        .item-name {
+
+            font-weight: 700;
+        }
+
+
+        .qty {
+
+            color: #a995b5;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           STEPS
+           ========================= */
+
+        .steps {
+
+            display: grid;
+
+            gap: 13px;
+
+            margin-top: 18px;
+        }
+
+
+        .step {
+
+            display: flex;
+
+            gap: 12px;
+        }
+
+
+        .step-num {
+
+            width: 32px;
+            height: 32px;
+
+            flex-shrink: 0;
+
+            display: grid;
+
+            place-items: center;
+
+            border-radius: 10px;
+
+            color: #d8b4fe;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(124,58,237,.35),
+                    rgba(192,38,211,.2)
+                );
+
+            border:
+                1px solid rgba(168,85,247,.25);
+        }
+
+
+        .step strong {
+
+            font-size: 13px;
+        }
+
+
+        .step span {
+
+            display: block;
+
+            margin-top: 3px;
+
+            color: #81768c;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           LOG
+           ========================= */
+
+        .log-card {
+
+            margin-top: 22px;
+        }
+
+
+        .log {
+
+            margin-top: 16px;
+
+            min-height: 180px;
+
+            max-height: 300px;
+
+            overflow: auto;
+
+            padding: 16px;
+
+            border-radius: 16px;
+
+            background:
+                #07050a;
+
+            border:
+                1px solid rgba(255,255,255,.08);
+
+            color: #cfc4d7;
+
+            font:
+                12px/1.7
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                Consolas,
+                monospace;
+        }
+
+
+        .log .ok {
+            color: #5ee7a0;
+        }
+
+
+        .log .warn {
+            color: #ffd166;
+        }
+
+
+        .empty {
+            color: #6f6477;
+        }
+
+
+        /* =========================
+           FOOTER
+           ========================= */
+
+        .footer {
+
+            text-align: center;
+
+            color: #675d70;
+
+            font-size: 11px;
+
+            margin-top: 20px;
+        }
+
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media(max-width:850px) {
+
+            .hero {
+
+                grid-template-columns: 1fr;
+
+                padding: 28px;
+            }
+
+
+            .orb-area {
+
+                height: 260px;
+            }
+
+
+            .grid {
+
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+
+        @media(max-width:600px) {
+
+            .app {
+
+                padding:
+                    18px 14px 40px;
+            }
+
+
+            .header {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+
+            .hero h2 {
+
+                font-size: 40px;
+            }
+
+
+            .orb {
+
+                width: 150px;
+
+                height: 150px;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<div class="background-grid"></div>
+
+
+<div class="app">
+
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div class="brand">
+
+            <div class="logo">
+                Z
+            </div>
+
+            <div>
+
+                <h1>
+                    Zepto AI Agent
+                </h1>
+
+                <p>
+                    3D voice grocery assistant
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <span
+                id="statusDot"
+                class="status-dot">
+            </span>
+
+            <span id="statusText">
+                Ready
+            </span>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+
+        <div class="hero-content">
+
+            <span class="eyebrow">
+                AI SHOPPING AGENT
+            </span>
+
+
+            <h2>
+                Your groceries.
+                <br>
+                One voice away.
+            </h2>
+
+
+            <p>
+                Tell the AI what you need.
+                It opens Zepto, searches for products,
+                adds them to your cart and stops before
+                checkout so you can review everything.
+            </p>
+
+
+            <div class="chips">
+
+                <span class="chip">
+                    🎙 Voice AI
+                </span>
+
+                <span class="chip">
+                    🛒 Smart Cart
+                </span>
+
+                <span class="chip">
+                    ⚡ Browser Agent
+                </span>
+
+                <span class="chip">
+                    🔐 Manual Checkout
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- 3D ORB -->
+
+        <div class="orb-area">
+
+            <div class="orb">
+
+                <div class="orb-core"></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- MAIN GRID -->
+
+    <main class="grid">
+
+
+        <!-- VOICE CARD -->
+
+        <section class="card">
+
+            <h3>
+                🎙 Voice Command
+            </h3>
+
+            <div class="muted">
+                Say:
+                “Order 2 milk and 1 bread”
+            </div>
+
+
+            <div class="voice-box">
+
+
+                <button
+                    id="micBtn"
+                    class="mic"
+                    type="button"
+                    aria-label="Start voice command">
+
+                    🎙
+
+                </button>
+
+
+                <div
+                    id="voiceState"
+                    class="voice-state">
+
+                    Tap to speak
+
+                </div>
+
+
+                <div
+                    id="transcript"
+                    class="transcript">
+
+                    After you finish speaking,
+                    the agent starts automatically.
+
+                </div>
+
+            </div>
+
+
+            <!-- Optional typed command -->
+
+            <textarea
+                id="command"
+                placeholder="You can also type an order here...">
+            </textarea>
+
+        </section>
+
+
+
+        <!-- ORDER CARD -->
+
+        <section class="card">
+
+            <h3>
+                🛒 Order Plan
+            </h3>
+
+            <div class="muted">
+                Products detected from your command
+            </div>
+
+
+            <div
+                id="plan"
+                class="plan">
+
+                <div class="empty">
+                    No order yet.
+                </div>
+
+            </div>
+
+
+            <h3 style="margin-top:26px">
+                Agent Workflow
+            </h3>
+
+
+            <div class="steps">
+
+
+                <div class="step">
+
+                    <div class="step-num">
+                        1
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            🎙 Speak
+                        </strong>
+
+                        <span>
+                            Tell the AI what groceries
+                            you want.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-num">
+                        2
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            🤖 Automatic Agent
+                        </strong>
+
+                        <span>
+                            Voice recognition automatically
+                            starts the Java agent.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-num">
+                        3
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            🛒 Smart Cart
+                        </strong>
+
+                        <span>
+                            Products are searched and
+                            added to the Zepto cart.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-num">
+                        4
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            🔐 Your Review
+                        </strong>
+
+                        <span>
+                            The agent stops before checkout
+                            and payment.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ACTIVITY -->
+
+    <section class="card log-card">
+
+        <h3>
+            ⚡ Agent Activity
+        </h3>
+
+        <div class="muted">
+            Live status from your browser agent
+        </div>
+
+
+        <div
+            id="log"
+            class="log">
+
+            <div class="empty">
+                Waiting for your voice command...
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <div class="footer">
+
+        Zepto AI Agent • 3D Interface •
+        Review before purchase
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+    /* =========================
+       ELEMENTS
+       ========================= */
+
+    const command =
+        document.getElementById("command");
+
+
+    const micBtn =
+        document.getElementById("micBtn");
+
+
+    const voiceState =
+        document.getElementById("voiceState");
+
+
+    const transcript =
+        document.getElementById("transcript");
+
+
+    const plan =
+        document.getElementById("plan");
+
+
+    const log =
+        document.getElementById("log");
+
+
+    const statusText =
+        document.getElementById("statusText");
+
+
+    const statusDot =
+        document.getElementById("statusDot");
+
+
+
+    /* =========================
+       STATUS
+       ========================= */
+
+    function setStatus(
+        text,
+        active = false
+    ) {
+
+        statusText.textContent =
+            text;
+
+        statusDot.classList.toggle(
+            "active",
+            active
+        );
+
+    }
+
+
+
+    /* =========================
+       LOG
+       ========================= */
+
+    function addLog(
+        text,
+        type = ""
+    ) {
+
+        if (
+            log.querySelector(".empty")
+        ) {
+
+            log.innerHTML = "";
+
+        }
+
+
+        const line =
+            document.createElement("div");
+
+
+        if (type) {
+
+            line.className =
+                type;
+
+        }
+
+
+        line.textContent =
+            "› " + text;
+
+
+        log.appendChild(line);
+
+
+        log.scrollTop =
+            log.scrollHeight;
+
+    }
+
+
+
+    /* =========================
+       ORDER PLAN
+       ========================= */
+
+    function renderPlan(
+        items
+    ) {
+
+        if (
+            !items ||
+            !items.length
+        ) {
+
+            plan.innerHTML =
+                '<div class="empty">' +
+                'No order yet.' +
+                '</div>';
+
+            return;
+
+        }
+
+
+        plan.innerHTML =
+            items.map(item => `
+
+                <div class="item">
+
+                    <span class="item-name">
+
+                        ${escapeHtml(
+                            item.name || ""
+                        )}
+
+                    </span>
+
+                    <span class="qty">
+
+                        ×
+                        ${escapeHtml(
+                            String(
+                                item.quantity ?? 1
+                            )
+                        )}
+
+                    </span>
+
+                </div>
+
+            `).join("");
+
+    }
+
+
+
+    /* =========================
+       HTML ESCAPE
+       ========================= */
+
+    function escapeHtml(
+        value
+    ) {
+
+        return value.replace(
+            /[&<>"']/g,
+
+            character => ({
+
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+
+            }[character])
+        );
+
+    }
+
+
+
+    /* =========================
+       AUTOMATIC JAVA AGENT
+       ========================= */
+
+    async function runAgentAutomatically() {
+
+        const text =
+            command.value.trim();
+
+
+        if (!text) {
+
+            addLog(
+                "No voice command detected.",
+                "warn"
+            );
+
+            setStatus(
+                "Ready"
+            );
+
+            return;
+
+        }
+
+
+        setStatus(
+            "Starting Agent",
+            true
+        );
+
+
+        addLog(
+            "Voice command received: " +
+            text
+        );
+
+
+        addLog(
+            "Sending command to Java agent..."
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/run",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                text: text
+                            })
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Server returned HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (data.items) {
+
+                renderPlan(
+                    data.items
+                );
+
+            }
+
+
+            addLog(
+                data.message ||
+                "Java browser agent started.",
+                "ok"
+            );
+
+
+            addLog(
+                "Chromium will open automatically.",
+                "ok"
+            );
+
+
+            setStatus(
+                "Agent Active",
+                true
+            );
+
+        }
+
+
+        catch (error) {
+
+            addLog(
+                "Could not start agent: " +
+                error.message,
+                "warn"
+            );
+
+
+            setStatus(
+                "Connection Error"
+            );
+
+        }
+
+    }
+
+
+
+    /* =========================
+       VOICE RECOGNITION
+       ========================= */
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+    let recognition = null;
+
+
+    if (SpeechRecognition) {
+
+
+        recognition =
+            new SpeechRecognition();
+
+
+        recognition.lang =
+            "en-IN";
+
+
+        recognition.interimResults =
+            true;
+
+
+        recognition.continuous =
+            false;
+
+
+        /* START */
+
+        recognition.onstart =
+            () => {
+
+                micBtn.classList.add(
+                    "listening"
+                );
+
+
+                voiceState.textContent =
+                    "Listening...";
+
+
+                transcript.textContent =
+                    "Speak your grocery order.";
+
+
+                setStatus(
+                    "Listening",
+                    true
+                );
+
+
+                addLog(
+                    "Microphone activated."
+                );
+
+            };
+
+
+
+        /* RESULT */
+
+        recognition.onresult =
+            event => {
+
+                let finalText =
+                    "";
+
+                let interim =
+                    "";
+
+
+                for (
+                    let i =
+                        event.resultIndex;
+
+                    i <
+                        event.results.length;
+
+                    i++
+                ) {
+
+
+                    if (
+                        event.results[i].isFinal
+                    ) {
+
+                        finalText +=
+                            event.results[i][0]
+                                .transcript;
+
+                    }
+
+                    else {
+
+                        interim +=
+                            event.results[i][0]
+                                .transcript;
+
+                    }
+
+                }
+
+
+                if (finalText) {
+
+                    command.value =
+                        finalText.trim();
+
+
+                    transcript.textContent =
+                        finalText.trim();
+
+
+                    addLog(
+                        "Heard: " +
+                        finalText.trim()
+                    );
+
+                }
+
+
+                else if (interim) {
+
+                    transcript.textContent =
+                        interim;
+
+                }
+
+            };
+
+
+
+        /* END */
+
+        recognition.onend =
+            () => {
+
+                micBtn.classList.remove(
+                    "listening"
+                );
+
+
+                voiceState.textContent =
+                    "Voice captured";
+
+
+                setStatus(
+                    "Processing",
+                    true
+                );
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * This automatically starts
+                 * the Java agent.
+                 *
+                 * No Run button required.
+                 */
+
+                if (
+                    command.value.trim()
+                ) {
+
+                    runAgentAutomatically();
+
+                }
+
+            };
+
+
+
+        /* ERROR */
+
+        recognition.onerror =
+            event => {
+
+                micBtn.classList.remove(
+                    "listening"
+                );
+
+
+                voiceState.textContent =
+                    "Voice error: " +
+                    event.error;
+
+
+                addLog(
+                    "Voice recognition error: " +
+                    event.error,
+                    "warn"
+                );
+
+
+                setStatus(
+                    "Ready"
+                );
+
+            };
+
+
+
+        /* MICROPHONE BUTTON */
+
+        micBtn.onclick =
+            () => {
+
+                try {
+
+                    command.value =
+                        "";
+
+                    transcript.textContent =
+                        "Listening...";
+
+
+                    recognition.start();
+
+                }
+
+                catch (error) {
+
+                    addLog(
+                        "Microphone could not start: " +
+                        error.message,
+                        "warn"
+                    );
+
+                }
+
+            };
+
+    }
+
+
+    else {
+
+        micBtn.disabled =
+            true;
+
+
+        voiceState.textContent =
+            "Voice input is not supported " +
+            "by this browser.";
+
+
+        addLog(
+            "Speech recognition is unavailable.",
+            "warn"
+        );
+
+    }
+
+
+</script>
+
+</body>
+</html>
